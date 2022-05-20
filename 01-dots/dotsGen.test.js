@@ -1,7 +1,7 @@
-import dots from "./dots.js";
+import dots from "./dotsGen.js";
 
 test("one-character string - returns just this string", () => {
-  expect(dots("a")).toStrictEqual(["a"]);
+  expect([...dots("a")]).toStrictEqual(["a"]);
 });
 
 test("ab -> ab, a.b", () => {
@@ -30,12 +30,10 @@ test("abcd -> abcd, a.bcd, ab.cd, abc.d, a.b.cd, a.bc.d, ab.c.d, a.b.c.d", () =>
 });
 
 test("number of options for arbitratily large strings equals 2 ^ (len - 1) and all options are different", () => {
-  const lengths = [
-    1, 2, 3, 4, 10, 15, 20, 24,
-  ];
+  const lengths = [1, 2, 3, 4, 10, 15, 20, 24];
   lengths.forEach((length) => {
     const str = "a".repeat(length);
-    const dotArr = dots(str);
+    const dotArr = [...dots(str)];
     // array items are unique
     expect(new Set(dotArr).size).toStrictEqual(dotArr.length);
 
