@@ -13,15 +13,12 @@ function writeJson(path, obj) {
 function transformData(data) {
   const userVacations = new Map();
   data.forEach((record) => {
-      console.log(record);
     const vacationInfo = {
       startDate: record.startDate,
       endDate: record.endDate,
     };
-      console.log(vacationInfo);
 
     const userId = record.user._id;
-    console.log(userId);
     if (!userVacations.has(userId)) {
       userVacations.set(userId, {
         userId,

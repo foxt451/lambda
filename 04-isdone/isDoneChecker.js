@@ -6,7 +6,7 @@ async function retryReq(resource, times = 3) {
       const res = await axios(resource);
       return res.data;
     } catch (err) {
-      console.log(`Failed to retrieve the resource (${err.response}).`);
+      console.log(`Failed to retrieve the resource (${JSON.stringify(err.response)}).`);
       if (i < times - 1) {
         console.log(`Retrying ${i + 1}/${times}...`);
       } else {
