@@ -28,10 +28,11 @@ const evaluateTime = ({ language, mimetype, count }) => {
   );
 };
 
+import CustomAPI_Error from "../errors/CustomAPI_Error.js";
 const tryGetLangData = (language) => {
   const langData = languageData[language];
   if (langData === undefined) {
-    throw new Error("Unsupported language");
+    throw new CustomAPI_Error("Unsupported language", 400);
   }
   return langData;
 };
