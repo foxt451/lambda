@@ -5,6 +5,8 @@ import { Buffer } from "node:buffer";
 type command = () => void;
 
 const echo = (bot: TelegramBot, msg: Message) => {
+  console.log(`User entered ${msg.text}`);
+
   bot.sendMessage(msg.chat.id, msg.text ?? "");
 };
 
@@ -12,6 +14,7 @@ const photoUrl = "https://picsum.photos/200/300";
 const sendImage = async (bot: TelegramBot, msg: Message) => {
   try {
     const result = await axios.get(photoUrl, { responseType: "arraybuffer" });
+    console.log("User requested a photo");
 
     bot.sendPhoto(
       msg.chat.id,
