@@ -146,12 +146,18 @@ var GameGuesser = /** @class */ (function () {
         this.map = map;
     }
     //returns number of mines that have been uncovered without risk of losing
+    // from easiest strategy go to hardest, if previous fail
     GameGuesser.prototype.solve = function () {
         while (true) {
             var hadResult1 = this.excludeStrategy();
-            var hadResult2 = this.compareStrategy();
-            if (!hadResult1 && !hadResult2) {
-                break;
+            if (!hadResult1) {
+                var hadResult2 = this.compareStrategy();
+                if (!hadResult2) {
+                    // const hadResult3: boolean = this.influenceRegionsStrategy();
+                    // if (!hadResult3) {
+                    break;
+                    //}
+                }
             }
         }
         return 1;
@@ -170,6 +176,51 @@ var GameGuesser = /** @class */ (function () {
                 if (!(_b = this.map).isPossibleMine.apply(_b, borderPos)) {
                     hasResults = true;
                     (_c = this.map).updateMap.apply(_c, __spreadArray(__spreadArray([], borderPos, false), [open.apply(void 0, borderPos)], false));
+                }
+            }
+            if (!hasResults) {
+                if (iterNum === 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+            iterNum++;
+        }
+    };
+    // mark regions of uncovered border cells as having to have some number of mines together in unknown exact positions but in that region
+    // now if they intersect, the intersection has to have that number of mines
+    // if intersection length and that number of bombs are equal, we can fill intersection with bombs
+    GameGuesser.prototype.influenceRegionsStrategy = function () {
+        var _b, _c;
+        var iterNum = 0;
+        while (true) {
+            var borderPositions = this.map.getBorderPositions();
+            var influenceRegions = {};
+            var hasResults = false;
+            for (var _i = 0, borderPositions_2 = borderPositions; _i < borderPositions_2.length; _i++) {
+                var borderPos = borderPositions_2[_i];
+                var borderBorderPoses = (_b = this.map).getSurroundingPositions.apply(_b, borderPos);
+                for (var _d = 0, borderBorderPoses_1 = borderBorderPoses; _d < borderBorderPoses_1.length; _d++) {
+                    var borderBorderPos = borderBorderPoses_1[_d];
+                    if ((_c = this.map).isSafePosition.apply(_c, borderBorderPos)) {
+                        var strRepr = JSON.stringify(borderBorderPos);
+                        if (strRepr in influenceRegions) {
+                            influenceRegions[strRepr].push(borderPos);
+                        }
+                        else {
+                            influenceRegions[strRepr] = [borderPos];
+                        }
+                    }
+                }
+            }
+            for (var _e = 0, _f = Object.keys(influenceRegions); _e < _f.length; _e++) {
+                var governor = _f[_e];
+                for (var _g = 0, _h = Object.keys(influenceRegions); _g < _h.length; _g++) {
+                    var governor1 = _h[_g];
+                    if (governor === governor1)
+                        continue;
                 }
             }
             if (!hasResults) {

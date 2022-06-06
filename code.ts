@@ -147,12 +147,18 @@ class GameGuesser {
   constructor(private readonly map: GameMap) {}
 
   //returns number of mines that have been uncovered without risk of losing
+  // from easiest strategy go to hardest, if previous fail
   solve(): number {
     while (true) {
       const hadResult1: boolean = this.excludeStrategy();
-      const hadResult2: boolean = this.compareStrategy();
-      if (!hadResult1 && !hadResult2) {
-        break;
+      if (!hadResult1) {
+        const hadResult2: boolean = this.compareStrategy();
+        if (!hadResult2) {
+          // const hadResult3: boolean = this.influenceRegionsStrategy();
+          // if (!hadResult3) {
+          break;
+          //}
+        }
       }
     }
     return 1;
@@ -183,12 +189,74 @@ class GameGuesser {
     }
   }
 
+  // mark regions of uncovered border cells as having to have some number of mines together in unknown exact positions but in that region
+  // now if they intersect, the intersection has to have that number of mines
+  // if intersection length and that number of bombs are equal, we can fill intersection with bombs
+  influenceRegionsStrategy(): boolean {
+    let iterNum = 0;
+    while (true) {
+      const borderPositions: [number, number][] = this.map.getBorderPositions();
+      const influenceRegions: { [key: string]: [number, number][] } = {};
+      let hasResults: boolean = false;
+      for (const borderPos of borderPositions) {
+        const borderBorderPoses = this.map.getSurroundingPositions(
+          ...borderPos
+        );
+        for (const borderBorderPos of borderBorderPoses) {
+          if (this.map.isSafePosition(...borderBorderPos)) {
+            const strRepr = JSON.stringify(borderBorderPos);
+            if (strRepr in influenceRegions) {
+              influenceRegions[strRepr].push(borderPos);
+            } else {
+              influenceRegions[strRepr] = [borderPos];
+            }
+          }
+        }
+      }
+      for (const governor of Object.keys(influenceRegions)) {
+        for (const governor1 of Object.keys(influenceRegions)) {
+          if (governor === governor1) continue;
+        }
+      }
+      if (!hasResults) {
+        if (iterNum === 0) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      iterNum++;
+    }
+  }
+
+  // npStrategy() {
+  //   let iterNum = 0;
+  //   while (true) {
+  //     const borderPositions: [number, number][] = this.map.getBorderPositions();
+  //     let hasResults: boolean = false;
+  //     for (const borderPos of borderPositions) {
+  //       // try setting a mine on this positions and then check if it's impossible (if so set this place as a mine)
+  //       if (!this.map.isPossibleMine(...borderPos)) {
+  //         this.map.updateMap(...borderPos, open(...borderPos));
+  //       }
+  //     }
+  //     if (!hasResults) {
+  //       if (iterNum === 0) {
+  //         return false;
+  //       } else {
+  //         return true;
+  //       }
+  //     }
+  //     iterNum++;
+  //   }
+  // }
+
   // compares number of free spaces and required mines. if they correspond - set them
   compareStrategy(): boolean {
     let iterNum = 0;
     while (true) {
       const numPositions: [number, number][] = this.map.getNumPositions();
-      console.log(numPositions)
+      console.log(numPositions);
       let hasResults: boolean = false;
       for (const numPos of numPositions) {
         // count number of mines and free spaces around and compare
